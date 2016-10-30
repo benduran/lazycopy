@@ -33,7 +33,9 @@ function copydiff(args = {}) {
         if (fs.statSync(fromResolved).isDirectory()) {
             scanPath += '/**/*.*';
         }
-        glob(path.resolve(scanPath), (error, results) => {
+        glob(path.resolve(scanPath), {
+            nodir: true
+        }, (error, results) => {
             if (error) {
                 reject(error);
             }
@@ -52,13 +54,20 @@ function copydiff(args = {}) {
                         // We now have the relative path to the FROM area, so we should be able to copy this over to the TO area
                         const computedToPath = `${toResolved}${relPath}`;
                         try {
-                            fs.copySync(resolvedPath, computedToPath, {
-                                clobber: overwriteFiles,
-                                preserveTimestamps: true
-                            });
-                            counter++;
-                            process.stdout.write(`${counter} of ${results.length} files copied\r`); // This makes us continue outputting on the same line in the CLI
-                            resolve();
+                            if (!overwriteFiles && !fs.existsSync(computedToPath)) {
+                                fs.copySync(resolvedPath, computedToPath, {
+                                    clobber: overwriteFiles,
+                                    preserveTimestamps: true
+                                });
+                                counter++;
+                                if (fromCli) {
+                                    process.stdout.write(`${counter} of ${results.length} files copied\r`); // This makes us continue outputting on the same line in the CLI
+                                }
+                                resolve();
+                            }
+                            else {
+                                resolve();
+                            }
                         }
                         catch (error) {
                             reject(error);
@@ -68,7 +77,7 @@ function copydiff(args = {}) {
                 });
                 Promise.all(allPromises).then(() => {
                     if (fromCli) {
-                        console.log(`All files have been copied to ${toResolved}`);
+                        console.log(`All ${results.length} files have been copied to ${toResolved}`);
                     }
                     resolve();
                 }).catch((error) => {
