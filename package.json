@@ -1,0 +1,29 @@
+{
+  "name": "copydiff",
+  "version": "0.1.0",
+  "description": "Copy all files from one path to another that don't already exist in the destination path",
+  "main": "index.js",
+  "scripts": {
+    "build": "babel index.js --out-dir ./dist",
+    "build:watch": "babel index.js --out-dir ./dist --watch",
+    "copy": "node dist/index"
+  },
+  "keywords": [
+    "copy",
+    "files",
+    "exclude"
+  ],
+  "author": "Benjamin Duran <stratodyne@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "fs-extra": "^0.30.0",
+    "glob": "^7.1.1",
+    "minimist": "^1.2.0",
+    "progress": "^1.1.8"
+  },
+  "devDependencies": {
+    "babel-core": "^6.18.0",
+    "babel-preset-es2015": "^6.18.0",
+    "babel-preset-stage-1": "^6.16.0"
+  }
+}
