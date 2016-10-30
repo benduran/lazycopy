@@ -72,7 +72,7 @@ function copydiff() {
                             // We now have the relative path to the FROM area, so we should be able to copy this over to the TO area
                             var computedToPath = '' + toResolved + relPath;
                             try {
-                                if (!overwriteFiles && !_fsExtra2.default.existsSync(computedToPath)) {
+                                if (overwriteFiles || !overwriteFiles && !_fsExtra2.default.existsSync(computedToPath)) {
                                     _fsExtra2.default.copySync(resolvedPath, computedToPath, {
                                         clobber: overwriteFiles,
                                         preserveTimestamps: true

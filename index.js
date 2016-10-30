@@ -54,7 +54,7 @@ function copydiff(args = {}) {
                         // We now have the relative path to the FROM area, so we should be able to copy this over to the TO area
                         const computedToPath = `${toResolved}${relPath}`;
                         try {
-                            if (!overwriteFiles && !fs.existsSync(computedToPath)) {
+                            if (overwriteFiles || (!overwriteFiles && !fs.existsSync(computedToPath))) {
                                 fs.copySync(resolvedPath, computedToPath, {
                                     clobber: overwriteFiles,
                                     preserveTimestamps: true
