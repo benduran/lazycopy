@@ -2,7 +2,7 @@
   "name": "copydiff",
   "version": "0.1.0",
   "description": "Copy all files from one path to another that don't already exist in the destination path",
-  "main": "index.js",
+  "main": "dist/index.js",
   "scripts": {
     "build": "babel index.js --out-dir ./dist",
     "build:watch": "babel index.js --out-dir ./dist --watch",
