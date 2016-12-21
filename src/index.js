@@ -49,7 +49,8 @@ class Copier {
                             cwd = process.cwd()
                         } = s;
                         cwd = path.resolve(cwd);
-                        glob(path.resolve(path.join(cwd, src)), {
+                        const scanPath = path.isAbsolute(src) ? src : path.resolve(path.join(cwd, src));
+                        glob(scanPath, {
                             nodir: true
                         }, (error, results) => {
                             if (error) {
@@ -59,12 +60,18 @@ class Copier {
                                 let childPromises = [];
                                 results.forEach((r) => {
                                     childPromises.push(new Promise((resolve, reject) => {
-                                        const relativePath = path.relative(cwd, r);
-                                        const toPath = path.join(path.resolve(path.join(dest, relativePath)));
-                                        this.ensurePath(toPath);
-                                        fs.createReadStream(r)
-                                        .pipe(fs.createWriteStream(toPath));
-                                        resolve();
+                                        try {
+                                            const relativePath = path.relative(cwd, r);
+                                            const toPath = path.join(path.resolve(path.join(dest, relativePath)));
+                                            this.ensurePath(toPath);
+                                            fs.createReadStream(r)
+                                            .pipe(fs.createWriteStream(toPath));
+                                            resolve();
+                                        }
+                                        catch (ex) {
+                                            console.error(ex);
+                                            reject(ex);
+                                        }
                                     }));
                                 });
                                 Promise.all(childPromises).then(resolve).catch(reject);
@@ -73,6 +80,34 @@ class Copier {
                     }));
                 });
                 Promise.all(topPromises).then(resolve).catch(reject);
+            }
+        });
+    }
+    copySync(sources) {
+        sources.forEach((s) => {
+            const {
+                src,
+                dest
+            } = s;
+            let {
+                cwd = process.cwd()
+            } = s;
+            cwd = path.resolve(cwd);
+            try {
+                const scanPath = path.isAbsolute(src) ? src : path.resolve(path.join(cwd, src));                
+                const results = glob.sync(scanPath, {
+                    nodir: true
+                });
+                results.forEach((r) => {
+                    const relativePath = path.relative(cwd, r);
+                    const toPath = path.join(path.resolve(path.join(dest, relativePath)));
+                    this.ensurePath(toPath);
+                    fs.createReadStream(r)
+                    .pipe(fs.createWriteStream(toPath));
+                });
+            }
+            catch (ex) {
+                throw ex;
             }
         });
     }

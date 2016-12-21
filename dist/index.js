@@ -72,7 +72,8 @@ var Copier = function () {
                                     cwd = _s$cwd === undefined ? process.cwd() : _s$cwd;
 
                                 cwd = _path2.default.resolve(cwd);
-                                (0, _glob2.default)(_path2.default.resolve(_path2.default.join(cwd, src)), {
+                                var scanPath = _path2.default.isAbsolute(src) ? src : _path2.default.resolve(_path2.default.join(cwd, src));
+                                (0, _glob2.default)(scanPath, {
                                     nodir: true
                                 }, function (error, results) {
                                     if (error) {
@@ -82,11 +83,16 @@ var Copier = function () {
                                             var childPromises = [];
                                             results.forEach(function (r) {
                                                 childPromises.push(new Promise(function (resolve, reject) {
-                                                    var relativePath = _path2.default.relative(cwd, r);
-                                                    var toPath = _path2.default.join(_path2.default.resolve(_path2.default.join(dest, relativePath)));
-                                                    _this.ensurePath(toPath);
-                                                    _fs2.default.createReadStream(r).pipe(_fs2.default.createWriteStream(toPath));
-                                                    resolve();
+                                                    try {
+                                                        var relativePath = _path2.default.relative(cwd, r);
+                                                        var toPath = _path2.default.join(_path2.default.resolve(_path2.default.join(dest, relativePath)));
+                                                        _this.ensurePath(toPath);
+                                                        _fs2.default.createReadStream(r).pipe(_fs2.default.createWriteStream(toPath));
+                                                        resolve();
+                                                    } catch (ex) {
+                                                        console.error(ex);
+                                                        reject(ex);
+                                                    }
                                                 }));
                                             });
                                             Promise.all(childPromises).then(resolve).catch(reject);
@@ -97,6 +103,34 @@ var Copier = function () {
                         });
                         Promise.all(topPromises).then(resolve).catch(reject);
                     })();
+                }
+            });
+        }
+    }, {
+        key: 'copySync',
+        value: function copySync(sources) {
+            var _this2 = this;
+
+            sources.forEach(function (s) {
+                var src = s.src,
+                    dest = s.dest;
+                var _s$cwd2 = s.cwd,
+                    cwd = _s$cwd2 === undefined ? process.cwd() : _s$cwd2;
+
+                cwd = _path2.default.resolve(cwd);
+                try {
+                    var scanPath = _path2.default.isAbsolute(src) ? src : _path2.default.resolve(_path2.default.join(cwd, src));
+                    var results = _glob2.default.sync(scanPath, {
+                        nodir: true
+                    });
+                    results.forEach(function (r) {
+                        var relativePath = _path2.default.relative(cwd, r);
+                        var toPath = _path2.default.join(_path2.default.resolve(_path2.default.join(dest, relativePath)));
+                        _this2.ensurePath(toPath);
+                        _fs2.default.createReadStream(r).pipe(_fs2.default.createWriteStream(toPath));
+                    });
+                } catch (ex) {
+                    throw ex;
                 }
             });
         }
