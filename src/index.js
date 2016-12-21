@@ -83,6 +83,3 @@ function getInstance() {
 }
 
 export default getInstance;
-
-// This is just a sample
-getInstance().copy([{src: './node_modules/**/**', dest: './testing'}]);

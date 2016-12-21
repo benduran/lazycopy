@@ -110,6 +110,3 @@ function getInstance() {
 }
 
 exports.default = getInstance;
-
-
-getInstance().copy([{ src: './node_modules/**/**', dest: './testing' }]);

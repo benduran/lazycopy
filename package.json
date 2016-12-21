@@ -1,11 +1,12 @@
 {
-  "name": "fuckingcopy",
+  "name": "lazycopy",
   "version": "0.1.0",
-  "description": "Fuck you. Copying files sucks. Globs only",
+  "description": "Globs only. Copy stuff with ease, all while maintaining your directory structure!",
   "main": "./dist/index.js",
   "scripts": {
     "build": "babel ./src --out-dir ./dist",
-    "build:watch": "babel ./src --out-dir ./dist --watch"
+    "build:watch": "babel ./src --out-dir ./dist --watch",
+    "test": "mocha test/index --compilers js:babel-core/register"
   },
   "author": "Benjamin Duran <stratodyne@gmail.com>",
   "license": "ISC",
@@ -14,7 +15,9 @@
     "babel-cli": "^6.18.0",
     "babel-core": "^6.21.0",
     "babel-preset-latest": "^6.16.0",
-    "babel-preset-stage-1": "^6.16.0"
+    "babel-preset-stage-1": "^6.16.0",
+    "chai": "^3.5.0",
+    "mocha": "^3.2.0"
   },
   "dependencies": {
     "glob": "^7.1.1"
