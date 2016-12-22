@@ -4,119 +4,143 @@ Object.defineProperty(exports, "__esModule", {
     value: true
 });
 
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
 var _path = require('path');
 
 var _path2 = _interopRequireDefault(_path);
 
-var _minimist = require('minimist');
+var _fs = require('fs');
 
-var _minimist2 = _interopRequireDefault(_minimist);
+var _fs2 = _interopRequireDefault(_fs);
 
 var _glob = require('glob');
 
 var _glob2 = _interopRequireDefault(_glob);
 
-var _fsExtra = require('fs-extra');
-
-var _fsExtra2 = _interopRequireDefault(_fsExtra);
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var fromCli = !module.parent; // If there isn't a parent module, then it was run directly from the CLI
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-function copydiff() {
-    var args = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+var Copier = function () {
+    function Copier() {
+        _classCallCheck(this, Copier);
+    }
 
-    return new Promise(function (resolve, reject) {
-        if (fromCli) {
-            args = (0, _minimist2.default)(process.argv.slice(2));
-        }
-        var _args = args,
-            o = _args.o,
-            overwrite = _args.overwrite,
-            from = _args.from,
-            to = _args.to;
-
-        var overwriteFiles = o || overwrite || false;
-        if (!from) {
-            reject(new Error('No "from" provided to copydiff'));
-        }
-        if (!to) {
-            reject(new Error('No "to" provided to copydiff'));
-        }
-        var fromResolved = _path2.default.resolve(from);
-        var toResolved = _path2.default.resolve(to);
-        var useForwardSlash = fromResolved.lastIndexOf('/') > -1;
-        var scanPath = fromResolved;
-        if (_fsExtra2.default.statSync(fromResolved).isDirectory()) {
-            scanPath += '/**/*.*';
-        }
-        (0, _glob2.default)(_path2.default.resolve(scanPath), {
-            nodir: true
-        }, function (error, results) {
-            if (error) {
-                reject(error);
+    _createClass(Copier, [{
+        key: 'ensurePath',
+        value: function ensurePath(p) {
+            // ensures that the file path exists on disk
+            var filename = _path2.default.basename(p);
+            var extension = _path2.default.extname(p);
+            var absPath = null;
+            if (!extension) {
+                absPath = p.substring(0, p.lastIndexOf(_path2.default.sep));
             } else {
-                (function () {
-                    var bar = null,
-                        allPromises = [];
-                    if (fromCli) {
-                        console.log(results.length + ' files to be copied');
-                    }
-                    // Check if the file is already existing in the new location
-                    var counter = 0;
-                    results.forEach(function (r) {
-                        var def = new Promise(function (resolve, reject) {
-                            var resolvedPath = _path2.default.resolve(r);
-                            var relPath = resolvedPath.replace(fromResolved, '');
-                            // We now have the relative path to the FROM area, so we should be able to copy this over to the TO area
-                            var computedToPath = '' + toResolved + relPath;
-                            try {
-                                if (overwriteFiles || !_fsExtra2.default.existsSync(computedToPath)) {
-                                    _fsExtra2.default.copySync(resolvedPath, computedToPath, {
-                                        clobber: overwriteFiles,
-                                        preserveTimestamps: true
-                                    });
-                                    counter++;
-                                    if (fromCli) {
-                                        process.stdout.write(counter + ' of ' + results.length + ' files copied\r'); // This makes us continue outputting on the same line in the CLI
-                                    }
-                                    resolve();
-                                } else {
-                                    resolve();
-                                }
-                            } catch (error) {
-                                reject(error);
-                            }
-                        });
-                        allPromises.push(def);
-                    });
-                    Promise.all(allPromises).then(function () {
-                        if (fromCli) {
-                            console.log('All ' + results.length + ' files have been copied to ' + toResolved);
-                        }
-                        resolve();
-                    }).catch(function (error) {
-                        if (fromCli) {
-                            console.log(error.stack);
-                            console.error(error);
-                        }
-                        reject(error);
-                    });
-                })();
+                absPath = p.substring(0, p.indexOf(filename));
             }
-        });
-    });
+            var constructed = '';
+            absPath.split(_path2.default.sep).filter(function (part) {
+                return part.length;
+            }).forEach(function (part) {
+                if (!constructed) {
+                    constructed = part;
+                } else {
+                    constructed += '' + _path2.default.sep + part;
+                }
+                if (!_fs2.default.existsSync(constructed)) {
+                    _fs2.default.mkdirSync(constructed);
+                }
+            });
+        }
+    }, {
+        key: 'copy',
+        value: function copy(sources) {
+            var _this = this;
+
+            return new Promise(function (resolve, reject) {
+                if (!sources) {
+                    reject(new Error('No sources were provided.'));
+                } else {
+                    (function () {
+                        var topPromises = [];
+                        sources.forEach(function (s) {
+                            topPromises.push(new Promise(function (resolve, reject) {
+                                var src = s.src,
+                                    dest = s.dest;
+                                var _s$cwd = s.cwd,
+                                    cwd = _s$cwd === undefined ? process.cwd() : _s$cwd;
+
+                                cwd = _path2.default.resolve(cwd);
+                                var scanPath = _path2.default.isAbsolute(src) ? src : _path2.default.resolve(_path2.default.join(cwd, src));
+                                (0, _glob2.default)(scanPath, {
+                                    nodir: true
+                                }, function (error, results) {
+                                    if (error) {
+                                        reject(error);
+                                    } else {
+                                        (function () {
+                                            var childPromises = [];
+                                            results.forEach(function (r) {
+                                                childPromises.push(new Promise(function (resolve, reject) {
+                                                    try {
+                                                        var relativePath = _path2.default.relative(cwd, r);
+                                                        var toPath = _path2.default.resolve(_path2.default.join(dest, relativePath));
+                                                        _this.ensurePath(toPath);
+                                                        _fs2.default.createReadStream(r).pipe(_fs2.default.createWriteStream(toPath));
+                                                        resolve();
+                                                    } catch (ex) {
+                                                        console.error(ex);
+                                                        reject(ex);
+                                                    }
+                                                }));
+                                            });
+                                            Promise.all(childPromises).then(resolve).catch(reject);
+                                        })();
+                                    }
+                                });
+                            }));
+                        });
+                        Promise.all(topPromises).then(resolve).catch(reject);
+                    })();
+                }
+            });
+        }
+    }, {
+        key: 'copySync',
+        value: function copySync(sources) {
+            var _this2 = this;
+
+            sources.forEach(function (s) {
+                var src = s.src,
+                    dest = s.dest;
+                var _s$cwd2 = s.cwd,
+                    cwd = _s$cwd2 === undefined ? process.cwd() : _s$cwd2;
+
+                cwd = _path2.default.resolve(cwd);
+                try {
+                    var scanPath = _path2.default.isAbsolute(src) ? src : _path2.default.resolve(_path2.default.join(cwd, src));
+                    var results = _glob2.default.sync(scanPath, {
+                        nodir: true
+                    });
+                    results.forEach(function (r) {
+                        var relativePath = _path2.default.relative(cwd, r);
+                        var toPath = _path2.default.join(_path2.default.resolve(_path2.default.join(dest, relativePath)));
+                        _this2.ensurePath(toPath);
+                        _fs2.default.createReadStream(r).pipe(_fs2.default.createWriteStream(toPath));
+                    });
+                } catch (ex) {
+                    throw ex;
+                }
+            });
+        }
+    }]);
+
+    return Copier;
+}();
+
+function getInstance() {
+    return new Copier();
 }
 
-exports.default = copydiff;
-
-
-if (fromCli) {
-    Promise.resolve(copydiff()).then(function () {}).catch(function (error) {
-        console.log(error.stack);
-        console.error(error);
-    }).then(function () {
-        process.exit();
-    });
-}
+exports.default = getInstance;
