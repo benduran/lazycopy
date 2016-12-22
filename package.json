@@ -1,6 +1,6 @@
 {
   "name": "lazycopy",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Globs only. Copy stuff with ease, all while maintaining your directory structure!",
   "main": "./dist/index.js",
   "scripts": {

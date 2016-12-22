@@ -10,7 +10,10 @@ It's called **lazycopy** because I never want to write another set of functions 
 
 ## Usage
 ```
-const lazy = require('lazycopy')();
+const lazy = require('lazycopy').default; // If you're not using ES6 Modules
+
+
+const lazy = require('lazycopy'); // If you're using ES6 modules
 ```
 
 ## API
