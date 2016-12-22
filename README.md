@@ -10,7 +10,7 @@ It's called **lazycopy** because I never want to write another set of functions 
 
 ## Usage
 ```
-const lazy = require('lazycopy');
+const lazy = require('lazycopy')();
 ```
 
 ## API
