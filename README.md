@@ -34,7 +34,7 @@ Example:
 
 ```
 // Copy files async (Promise-based)
-lazy.copy([{
+lazy().copy([{
     src: './someFolder/**/**', // Give me all the files under "someFolder"
     dest: './destination',
     cwd: __dirname // (Optionally set CWD for scanning for files)
@@ -53,7 +53,7 @@ Example:
 
 ```
 // Copy files synchronously
-lazy.copySync([{
+lazy().copySync([{
     src: './someFolder/**/**', // Give me all the files under "someFolder"
     dest: './destination',
     cwd: __dirname // (Optionally set CWD for scanning for files)
