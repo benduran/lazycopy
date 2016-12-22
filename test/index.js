@@ -25,14 +25,15 @@ function runAll() {
                     setTimeout(() => {
                         const testPath = path.resolve(path.join(__dirname, '../testing/node_modules/**/**'));
                         const copiedFiles = glob.sync(testPath);
+                        console.info(`${testAgainst.length} equal to ${copiedFiles.length}`);
                         expect(copiedFiles.length).to.be.equal(testAgainst.length);
                         resolve();
-                    }, 5000);
+                    }, 10000);
                 });
             }).catch((error) => {
                 expect(error).to.not.be.an('error');
             });
-        }).timeout(10000);
+        }).timeout(30000);
         it('Should synchronously copy everything from the node_modules folder into a testing folder', () => {
             return new Promise((resolve, reject) => {
                 const src = path.resolve(path.join(__dirname, '../node_modules/**/**'));
@@ -45,11 +46,12 @@ function runAll() {
                 setTimeout(() => {
                     const testPath = path.resolve(path.join(__dirname, '../testing/node_modules/**/**'));
                     const copiedFiles = glob.sync(testPath);
+                    console.info(`${testAgainst.length} equal to ${copiedFiles.length}`);                    
                     expect(copiedFiles.length).to.be.equal(testAgainst.length);
                     resolve();
-                }, 5000);
+                }, 10000);
             });
-        }).timeout(10000);
+        }).timeout(30000);
         afterEach(() => {
             fs.removeSync(path.join(__dirname, '../testing'));
         });

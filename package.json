@@ -9,6 +9,9 @@
     "test": "mocha test/index --compilers js:babel-core/register"
   },
   "author": "Benjamin Duran <stratodyne@gmail.com>",
+  "repository": {
+    "url": "https://github.com/benduran/lazycopy"
+  },
   "license": "ISC",
   "devDependencies": {
     "babel": "^6.5.2",

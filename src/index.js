@@ -62,7 +62,7 @@ class Copier {
                                     childPromises.push(new Promise((resolve, reject) => {
                                         try {
                                             const relativePath = path.relative(cwd, r);
-                                            const toPath = path.join(path.resolve(path.join(dest, relativePath)));
+                                            const toPath = path.resolve(path.join(dest, relativePath));
                                             this.ensurePath(toPath);
                                             fs.createReadStream(r)
                                             .pipe(fs.createWriteStream(toPath));

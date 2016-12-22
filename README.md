@@ -1,10 +1,58 @@
 ## lazycopy
-This is a simple CLI utility for copying all files from one directory to another. Allows for overwriting files in src directory if they already exist.
+This is a utility package that does only one thing: copy files in **glob** patterns to destination
+and retain the relative directory structure.
 
-### Motivation
-I'm super lazy and I have a huge music library. Rather than manually copying files to my NAS when I want to backup my latest music collection changes, I wrote a simple utility to automate this for me so I can leave it running in the background. This utility will also maintain the relative file tree structure when copying files.
+It's called **lazycopy** because I never want to write another set of functions to copy files, and I don't want to use
+**gulp** or **grunt** (or any other task runner) for automating my front-end builds :)
 
-## CLI Arguments
-- `--from` - `{string}` - Folder path with files you want to copy
-- `--to` - `{string}` - Folder destination where you want all of the files to go. Folder will be created if it doesn't already exist. All nested file tree paths will be created inside of this folder to mirror the `--from` path.
-- `--overwrite` - `{optional}` - Override files in the `--to` path if they already exist. Leave them alone if otherwise.
+## Installation
+`npm install lazycopy`
+
+## Usage
+```
+const lazy = require('lazycopy');
+```
+
+## API
+**copy(sources)**
+
+Copies an array of sources to their destination, but does so asynchronously. Returns a `Promise` that will be
+resolved when the copy operations have completed. *Rejects* promise if an error occurs while copying.
+
+If the required folders do no exist in the **destination** path, they will be automatically created.
+
+### Arguments
+**sources** - An `Array` of objects containing the following properties:
+- `src` - **required** - [Glob](https://github.com/isaacs/node-glob) pattern for file selection
+- `dest` - **required** - Output folder where files will be copied to
+- `cwd` - *optional* - Root where **lazycopy** will look for files to copy
+
+Example:
+
+```
+// Copy files async (Promise-based)
+lazy.copy([{
+    src: './someFolder/**/**', // Give me all the files under "someFolder"
+    dest: './destination',
+    cwd: __dirname // (Optionally set CWD for scanning for files)
+}]).then(() => {
+    console.info('Done!');
+}).catch((error) => {
+    console.info('Something blew up.');
+    console.error(error);
+});
+```
+
+**copySync(sources)**
+Performs a *synchronous* copy of files.
+
+Example:
+
+```
+// Copy files synchronously
+lazy.copySync([{
+    src: './someFolder/**/**', // Give me all the files under "someFolder"
+    dest: './destination',
+    cwd: __dirname // (Optionally set CWD for scanning for files)
+}]);
+```

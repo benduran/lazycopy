@@ -85,7 +85,7 @@ var Copier = function () {
                                                 childPromises.push(new Promise(function (resolve, reject) {
                                                     try {
                                                         var relativePath = _path2.default.relative(cwd, r);
-                                                        var toPath = _path2.default.join(_path2.default.resolve(_path2.default.join(dest, relativePath)));
+                                                        var toPath = _path2.default.resolve(_path2.default.join(dest, relativePath));
                                                         _this.ensurePath(toPath);
                                                         _fs2.default.createReadStream(r).pipe(_fs2.default.createWriteStream(toPath));
                                                         resolve();
