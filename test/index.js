@@ -13,9 +13,9 @@ function runAll() {
         it('Should asynchronously copy everything from the node_modules folder into a testing folder', () => {
             const src = path.resolve(path.join(__dirname, '../node_modules/**/**'));
             const testAgainst = glob.sync(src);
-            return copier().copy([{
+            return copier.copy([{
                 src,
-                dest: path.join(__dirname, '../testing'),
+                dest: path.join(__dirname, '../testing1'),
                 cwd: path.join(__dirname, '../')
             }]).then(() => {
                 // May need to wait for all files to be copied, as the code will likely finish executing before the OS
@@ -23,7 +23,7 @@ function runAll() {
                 // This may not pass on non SSD machines because the I/O time will be substantially longer
                 return new Promise((resolve, reject) => {
                     setTimeout(() => {
-                        const testPath = path.resolve(path.join(__dirname, '../testing/node_modules/**/**'));
+                        const testPath = path.resolve(path.join(__dirname, '../testing1/node_modules/**/**'));
                         const copiedFiles = glob.sync(testPath);
                         console.info(`${testAgainst.length} equal to ${copiedFiles.length}`);
                         expect(copiedFiles.length).to.be.equal(testAgainst.length);
@@ -32,32 +32,38 @@ function runAll() {
                 });
             }).catch((error) => {
                 expect(error).to.not.be.an('error');
+                reject(error);
             });
-        }).timeout(30000);
+        }).timeout(40000);
         it('Should synchronously copy everything from the node_modules folder into a testing folder', () => {
             return new Promise((resolve, reject) => {
-                const src = path.resolve(path.join(__dirname, '../node_modules/**/**'));
-                const testAgainst = glob.sync(src);
-                copier().copySync([{
-                    src,
-                    dest: path.join(__dirname, '../testing'),
-                    cwd: path.join(__dirname, '../')
-                }]);
-                setTimeout(() => {
-                    const testPath = path.resolve(path.join(__dirname, '../testing/node_modules/**/**'));
-                    const copiedFiles = glob.sync(testPath);
-                    console.info(`${testAgainst.length} equal to ${copiedFiles.length}`);                    
-                    expect(copiedFiles.length).to.be.equal(testAgainst.length);
-                    resolve();
-                }, 10000);
+                try {
+                    const src = path.resolve(path.join(__dirname, '../node_modules/**/**'));
+                    const testAgainst = glob.sync(src);
+                    copier.copySync([{
+                        src,
+                        dest: path.join(__dirname, '../testing2'),
+                        cwd: path.join(__dirname, '../')
+                    }]);
+                    setTimeout(() => {
+                        const testPath = path.resolve(path.join(__dirname, '../testing2/node_modules/**/**'));
+                        const copiedFiles = glob.sync(testPath);
+                        console.info(`${testAgainst.length} equal to ${copiedFiles.length}`);                    
+                        expect(copiedFiles.length).to.be.equal(testAgainst.length);
+                        resolve();
+                    }, 10000);
+                }
+                catch (error) {
+                    reject(error);
+                }
             });
-        }).timeout(30000);
+        }).timeout(40000);
         it('Should asynchronously copy everything from the node_modules folder, excluding all js files', () => {
             const src = path.resolve(path.join(__dirname, '../node_modules/**/*.!(js)'));
             const testAgainst = glob.sync(src);
-            return copier().copy([{
+            return copier.copy([{
                 src,
-                dest: path.join(__dirname, '../testing'),
+                dest: path.join(__dirname, '../testing3'),
                 cwd: path.join(__dirname, '../')
             }]).then(() => {
                 // May need to wait for all files to be copied, as the code will likely finish executing before the OS
@@ -65,7 +71,7 @@ function runAll() {
                 // This may not pass on non SSD machines because the I/O time will be substantially longer
                 return new Promise((resolve, reject) => {
                     setTimeout(() => {
-                        const testPath = path.resolve(path.join(__dirname, '../testing/node_modules/**/*.!(js)'));
+                        const testPath = path.resolve(path.join(__dirname, '../testing3/node_modules/**/*.!(js)'));
                         const copiedFiles = glob.sync(testPath);
                         console.info(`${testAgainst.length} equal to ${copiedFiles.length}`);
                         expect(copiedFiles.length).to.be.equal(testAgainst.length);
@@ -73,11 +79,14 @@ function runAll() {
                     }, 10000);
                 });
             }).catch((error) => {
+                reject(error);
                 expect(error).to.not.be.an('error');
             });
-        }).timeout(30000);
-        afterEach(() => {
-            fs.removeSync(path.join(__dirname, '../testing'));
+        }).timeout(40000);
+        after(() => {
+            fs.removeSync(path.join(__dirname, '../testing1'));
+            fs.removeSync(path.join(__dirname, '../testing2'));
+            fs.removeSync(path.join(__dirname, '../testing3'));
         });
     });
 }

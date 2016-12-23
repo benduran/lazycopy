@@ -139,8 +139,4 @@ var Copier = function () {
     return Copier;
 }();
 
-function getInstance() {
-    return new Copier();
-}
-
-exports.default = getInstance;
+exports.default = new Copier();

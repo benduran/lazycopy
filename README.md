@@ -13,7 +13,7 @@ It's called **lazycopy** because I never want to write another set of functions 
 const lazy = require('lazycopy').default; // If you're not using ES6 Modules
 
 
-const lazy = require('lazycopy'); // If you're using ES6 modules
+import lazy from 'lazycopy'; // If you're using ES6 modules
 ```
 
 ## API
@@ -34,7 +34,7 @@ Example:
 
 ```
 // Copy files async (Promise-based)
-lazy().copy([{
+lazy.copy([{
     src: './someFolder/**/**', // Give me all the files under "someFolder"
     dest: './destination',
     cwd: __dirname // (Optionally set CWD for scanning for files)
@@ -53,7 +53,7 @@ Example:
 
 ```
 // Copy files synchronously
-lazy().copySync([{
+lazy.copySync([{
     src: './someFolder/**/**', // Give me all the files under "someFolder"
     dest: './destination',
     cwd: __dirname // (Optionally set CWD for scanning for files)

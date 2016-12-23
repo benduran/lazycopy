@@ -113,8 +113,4 @@ class Copier {
     }
 }
 
-function getInstance() {
-    return new Copier();
-}
-
-export default getInstance;
+export default new Copier();
