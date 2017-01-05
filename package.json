@@ -1,12 +1,12 @@
 {
   "name": "lazycopy",
-  "version": "0.1.4",
+  "version": "0.2.0",
   "description": "Globs only. Copy stuff with ease, all while maintaining your directory structure!",
   "main": "./dist/index.js",
   "scripts": {
     "build": "babel ./src --out-dir ./dist",
     "build:watch": "babel ./src --out-dir ./dist --watch",
-    "test": "mocha test/index --compilers js:babel-core/register -t 60000"
+    "test": "mocha test/index --compilers js:babel-core/register -t 1200000"
   },
   "author": "Benjamin Duran <stratodyne@gmail.com>",
   "repository": {
