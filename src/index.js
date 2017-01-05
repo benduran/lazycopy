@@ -43,7 +43,8 @@ class Copier {
                     topPromises.push(new Promise((resolve, reject) => {
                         const {
                             src,
-                            dest
+                            dest,
+                            maintainStructure = true
                         } = s;
                         let {
                             cwd = process.cwd()
@@ -62,7 +63,14 @@ class Copier {
                                     childPromises.push(new Promise((resolve, reject) => {
                                         try {
                                             const relativePath = path.relative(cwd, r);
-                                            const toPath = path.resolve(path.join(dest, relativePath));
+                                            let toPath = null;
+                                            if (maintainStructure) {
+                                                toPath = path.resolve(path.join(dest, relativePath));
+                                            }
+                                            else {
+                                                // All files are going into a folder, but we no longer care about their original path structure
+                                                toPath = path.resolve(path.join(dest, path.basename(r)));
+                                            }
                                             this.ensurePath(toPath);
                                             fs.createReadStream(r)
                                             .pipe(fs.createWriteStream(toPath));

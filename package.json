@@ -6,7 +6,7 @@
   "scripts": {
     "build": "babel ./src --out-dir ./dist",
     "build:watch": "babel ./src --out-dir ./dist --watch",
-    "test": "mocha test/index --compilers js:babel-core/register -t 60000"
+    "test": "mocha test/index --compilers js:babel-core/register -t 1200000"
   },
   "author": "Benjamin Duran <stratodyne@gmail.com>",
   "repository": {
