@@ -121,7 +121,9 @@ var Copier = function () {
 
             sources.forEach(function (s) {
                 var src = s.src,
-                    dest = s.dest;
+                    dest = s.dest,
+                    _s$maintainStructure2 = s.maintainStructure,
+                    maintainStructure = _s$maintainStructure2 === undefined ? true : _s$maintainStructure2;
                 var _s$cwd2 = s.cwd,
                     cwd = _s$cwd2 === undefined ? process.cwd() : _s$cwd2;
 
@@ -133,7 +135,13 @@ var Copier = function () {
                     });
                     results.forEach(function (r) {
                         var relativePath = _path2.default.relative(cwd, r);
-                        var toPath = _path2.default.join(_path2.default.resolve(_path2.default.join(dest, relativePath)));
+                        var toPath = null;
+                        if (maintainStructure) {
+                            toPath = _path2.default.resolve(_path2.default.join(dest, relativePath));
+                        } else {
+                            // All files are going into a folder, but we no longer care about their original path structure
+                            toPath = _path2.default.resolve(_path2.default.join(dest, _path2.default.basename(r)));
+                        }
                         _this2.ensurePath(toPath);
                         _fs2.default.createReadStream(r).pipe(_fs2.default.createWriteStream(toPath));
                     });

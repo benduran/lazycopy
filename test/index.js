@@ -111,11 +111,45 @@ function runAll() {
                 expect(error).to.not.be.an('error');
             });
         }).timeout(40000);
+        it('Should synchronously copy javascript files from the node_modules folder to the test folder, ignoring their relative path structure', () => {
+            const src = path.resolve(path.join(__dirname, '../node_modules/**/*.js'));
+            let testAgainst = glob.sync(src);
+            // Need to remove duplicates because the node_modules will likely use similar file names for their logic
+            const lookup = {};
+            testAgainst.forEach((s) => {
+                const filename = path.basename(s);
+                if (filename) {
+                    lookup[filename] = lookup[filename] ? lookup[filename] + 1 : 1;
+                }
+            });
+            testAgainst = Object.keys(lookup);
+            return new Promise((resolve, reject) => {
+                try {
+                    copier.copySync([{
+                        src,
+                        dest: path.join(__dirname, '../testing5'),
+                        cwd: path.join(__dirname, '../'),
+                        maintainStructure: false
+                    }]);
+                    setTimeout(() => {
+                        const testPath = path.resolve(path.join(__dirname, '../testing5/*.js'));
+                        const copiedFiles = glob.sync(testPath);
+                        expect(testAgainst.length).to.be.equal(copiedFiles.length);
+                        resolve();
+                    }, 10000);
+                }
+                catch (ex) {
+                    reject(ex);
+                    expect(ex).to.not.be.an('error');
+                }
+            });
+        }).timeout(40000);
         after(() => {
             fs.removeSync(path.join(__dirname, '../testing1'));
             fs.removeSync(path.join(__dirname, '../testing2'));
             fs.removeSync(path.join(__dirname, '../testing3'));
             fs.removeSync(path.join(__dirname, '../testing4'));
+            fs.removeSync(path.join(__dirname, '../testing5'));
         });
     });
 }

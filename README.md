@@ -29,6 +29,7 @@ If the required folders do no exist in the **destination** path, they will be au
 - `src` - **required** - [Glob](https://github.com/isaacs/node-glob) pattern for file selection
 - `dest` - **required** - Output folder where files will be copied to
 - `cwd` - *optional* - Root where **lazycopy** will look for files to copy
+- `maintainStructure` - *optional (defaults to `true`)* - If set to false, the file's relative structure will not be preserved
 
 Example:
 
