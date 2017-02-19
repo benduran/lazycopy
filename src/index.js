@@ -1,10 +1,11 @@
 'use strict';
 
 import path from 'path';
-import fs from 'fs';
 
+import fs from 'graceful-fs';
 import glob from 'glob';
 import minimist from 'minimist';
+import ProgressBar from 'progress';
 
 class Copier {
     ensurePath(p) {
@@ -33,6 +34,12 @@ class Copier {
             }
         });
     }
+    createProgressBar(fromCli, total) {
+        return fromCli ? new ProgressBar(':bar\r', {
+            total,
+            stream: process.stdout
+        }) : null;
+    }
     copy(sources, fromCli = false) {
         return new Promise((resolve, reject) => {
             if (!sources) {
@@ -60,6 +67,7 @@ class Copier {
                             }
                             else {
                                 let childPromises = [];
+                                const progressBar = this.createProgressBar(fromCli, results.length);
                                 results.forEach((r) => {
                                     childPromises.push(new Promise((resolve, reject) => {
                                         try {
@@ -75,6 +83,9 @@ class Copier {
                                             this.ensurePath(toPath);
                                             fs.createReadStream(r)
                                             .pipe(fs.createWriteStream(toPath));
+                                            if (progressBar) {
+                                                progressBar.tick();
+                                            }
                                             resolve();
                                         }
                                         catch (ex) {
@@ -108,6 +119,7 @@ class Copier {
                 const results = glob.sync(scanPath, {
                     nodir: true
                 });
+                const progressBar = this.createProgressBar(fromCli, results.length);
                 results.forEach((r) => {
                     const relativePath = path.relative(cwd, r);
                     let toPath = null;
@@ -121,6 +133,9 @@ class Copier {
                     this.ensurePath(toPath);
                     fs.createReadStream(r)
                     .pipe(fs.createWriteStream(toPath));
+                    if (progressBar) {
+                        progressBar.tick();
+                    }
                 });
             }
             catch (ex) {
@@ -149,8 +164,8 @@ if (!module.parent) {
                 src,
                 dest,
                 maintainStructure
-            }]).then(() => {
-                console.log(`lazycopy done copying ${src} to ${dest}`);
+            }], true).then(() => {
+                console.info('Flushing files...');
             }).catch((error) => {
                 console.error(error);
             });

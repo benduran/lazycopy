@@ -10,9 +10,9 @@ var _path = require('path');
 
 var _path2 = _interopRequireDefault(_path);
 
-var _fs = require('fs');
+var _gracefulFs = require('graceful-fs');
 
-var _fs2 = _interopRequireDefault(_fs);
+var _gracefulFs2 = _interopRequireDefault(_gracefulFs);
 
 var _glob = require('glob');
 
@@ -21,6 +21,10 @@ var _glob2 = _interopRequireDefault(_glob);
 var _minimist2 = require('minimist');
 
 var _minimist3 = _interopRequireDefault(_minimist2);
+
+var _progress = require('progress');
+
+var _progress2 = _interopRequireDefault(_progress);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -52,10 +56,18 @@ var Copier = function () {
                 } else {
                     constructed += '' + _path2.default.sep + part;
                 }
-                if (!_fs2.default.existsSync(constructed)) {
-                    _fs2.default.mkdirSync(constructed);
+                if (!_gracefulFs2.default.existsSync(constructed)) {
+                    _gracefulFs2.default.mkdirSync(constructed);
                 }
             });
+        }
+    }, {
+        key: 'createProgressBar',
+        value: function createProgressBar(fromCli, total) {
+            return fromCli ? new _progress2.default(':bar\r', {
+                total: total,
+                stream: process.stdout
+            }) : null;
         }
     }, {
         key: 'copy',
@@ -87,6 +99,7 @@ var Copier = function () {
                                     reject(error);
                                 } else {
                                     var childPromises = [];
+                                    var progressBar = _this.createProgressBar(fromCli, results.length);
                                     results.forEach(function (r) {
                                         childPromises.push(new Promise(function (resolve, reject) {
                                             try {
@@ -99,7 +112,10 @@ var Copier = function () {
                                                     toPath = _path2.default.resolve(_path2.default.join(dest, _path2.default.basename(r)));
                                                 }
                                                 _this.ensurePath(toPath);
-                                                _fs2.default.createReadStream(r).pipe(_fs2.default.createWriteStream(toPath));
+                                                _gracefulFs2.default.createReadStream(r).pipe(_gracefulFs2.default.createWriteStream(toPath));
+                                                if (progressBar) {
+                                                    progressBar.tick();
+                                                }
                                                 resolve();
                                             } catch (ex) {
                                                 console.error(ex);
@@ -137,6 +153,7 @@ var Copier = function () {
                     var results = _glob2.default.sync(scanPath, {
                         nodir: true
                     });
+                    var progressBar = _this2.createProgressBar(fromCli, results.length);
                     results.forEach(function (r) {
                         var relativePath = _path2.default.relative(cwd, r);
                         var toPath = null;
@@ -147,7 +164,10 @@ var Copier = function () {
                             toPath = _path2.default.resolve(_path2.default.join(dest, _path2.default.basename(r)));
                         }
                         _this2.ensurePath(toPath);
-                        _fs2.default.createReadStream(r).pipe(_fs2.default.createWriteStream(toPath));
+                        _gracefulFs2.default.createReadStream(r).pipe(_gracefulFs2.default.createWriteStream(toPath));
+                        if (progressBar) {
+                            progressBar.tick();
+                        }
                     });
                 } catch (ex) {
                     throw ex;
@@ -183,8 +203,8 @@ if (!module.parent) {
                 src: src,
                 dest: dest,
                 maintainStructure: maintainStructure
-            }]).then(function () {
-                console.log('lazycopy done copying ' + src + ' to ' + dest);
+            }], true).then(function () {
+                console.info('Flushing files...');
             }).catch(function (error) {
                 console.error(error);
             });
