@@ -1,6 +1,6 @@
 {
   "name": "lazycopy",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Globs only. Copy stuff with ease, all while maintaining your directory structure!",
   "main": "./dist/index.js",
   "scripts": {
@@ -14,13 +14,13 @@
   },
   "license": "ISC",
   "devDependencies": {
-    "babel": "^6.5.2",
-    "babel-cli": "^6.18.0",
-    "babel-core": "^6.21.0",
-    "babel-preset-latest": "^6.16.0",
-    "babel-preset-stage-1": "^6.16.0",
+    "babel": "^6.23.0",
+    "babel-cli": "^6.23.0",
+    "babel-core": "^6.23.1",
+    "babel-preset-latest": "^6.22.0",
+    "babel-preset-stage-1": "^6.22.0",
     "chai": "^3.5.0",
-    "fs-extra": "^1.0.0",
+    "fs-extra": "^2.0.0",
     "mocha": "^3.2.0"
   },
   "dependencies": {
