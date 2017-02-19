@@ -4,6 +4,7 @@ import path from 'path';
 import fs from 'fs';
 
 import glob from 'glob';
+import minimist from 'minimist';
 
 class Copier {
     ensurePath(p) {
@@ -32,7 +33,7 @@ class Copier {
             }
         });
     }
-    copy(sources) {
+    copy(sources, fromCli = false) {
         return new Promise((resolve, reject) => {
             if (!sources) {
                 reject(new Error('No sources were provided.'));
@@ -91,7 +92,7 @@ class Copier {
             }
         });
     }
-    copySync(sources) {
+    copySync(sources, fromCli = false) {
         sources.forEach((s) => {
             const {
                 src,
@@ -129,4 +130,47 @@ class Copier {
     }
 }
 
-export default new Copier();
+const instance = new Copier();
+
+export default instance;
+
+if (!module.parent) {
+    const args = process.argv.slice(2);
+    if (args.length >= 2) {
+        const src = args[0];
+        const dest = args[1];
+        const {
+            maintainStructure = true,
+            async = true
+        } = minimist(args.slice(2));
+        // First arg is the SRC glob and the 2nd is the destination. Optional arg is maintainStructure
+        if (async) {
+            instance.copy([{
+                src,
+                dest,
+                maintainStructure
+            }]).then(() => {
+                console.log(`lazycopy done copying ${src} to ${dest}`);
+            }).catch((error) => {
+                console.error(error);
+            });
+        }
+        else {
+            try {
+                instance.copySync([{
+                    src,
+                    dest,
+                    maintainStructure
+                }], true);
+                console.log(`lazycopy done copying ${src} to ${dest}`);
+            }
+            catch (error) {
+                console.error(error);
+            }
+        }
+    }
+    else {
+        console.log('lazycopy requires minimum of two arguments.');
+        console.log('lazycopy [srcGlob] [dest] [--maintainStructure=true]');
+    }
+}
