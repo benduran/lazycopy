@@ -1,7 +1,7 @@
 'use strict';
 
 import path from 'path';
-import fs from 'fs';
+import fs from 'graceful-fs';
 
 import glob from 'glob';
 
@@ -72,9 +72,11 @@ class Copier {
                                                 toPath = path.resolve(path.join(dest, path.basename(r)));
                                             }
                                             this.ensurePath(toPath);
+                                            const writeStream = fs.createWriteStream(toPath);
+                                            writeStream.once('finish', resolve);
+                                            writeStream.on('error', reject);
                                             fs.createReadStream(r)
-                                            .pipe(fs.createWriteStream(toPath));
-                                            resolve();
+                                            .pipe(writeStream);
                                         }
                                         catch (ex) {
                                             console.error(ex);
@@ -88,42 +90,6 @@ class Copier {
                     }));
                 });
                 Promise.all(topPromises).then(resolve).catch(reject);
-            }
-        });
-    }
-    copySync(sources) {
-        sources.forEach((s) => {
-            const {
-                src,
-                dest,
-                maintainStructure = true
-            } = s;
-            let {
-                cwd = process.cwd()
-            } = s;
-            cwd = path.resolve(cwd);
-            try {
-                const scanPath = path.isAbsolute(src) ? src : path.resolve(path.join(cwd, src));                
-                const results = glob.sync(scanPath, {
-                    nodir: true
-                });
-                results.forEach((r) => {
-                    const relativePath = path.relative(cwd, r);
-                    let toPath = null;
-                    if (maintainStructure) {
-                        toPath = path.resolve(path.join(dest, relativePath));
-                    }
-                    else {
-                        // All files are going into a folder, but we no longer care about their original path structure
-                        toPath = path.resolve(path.join(dest, path.basename(r)));
-                    }
-                    this.ensurePath(toPath);
-                    fs.createReadStream(r)
-                    .pipe(fs.createWriteStream(toPath));
-                });
-            }
-            catch (ex) {
-                throw ex;
             }
         });
     }
